@@ -1,0 +1,33 @@
+name: Daily Web Automation
+
+on:
+  schedule:
+    # Runs at 5:30 AM UTC (11:00 AM IST) daily
+    - cron: '30 5 * * *'
+  workflow_dispatch: # Allows you to run it manually
+
+jobs:
+  automate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Get the code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install required tools
+      run: npm install
+      
+    - name: Wait random time (0-60 minutes)
+      run: sleep $((RANDOM % 3600))
+      
+    - name: Run the automation
+      env:
+        TARGET_URL: ${{ secrets.TARGET_URL }}
+        USERNAME: ${{ secrets.USERNAME }}
+        PASSWORD: ${{ secrets.PASSWORD }}
+      run: node automation.js
