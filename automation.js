@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 async function runAutomation() {
-  console.log('🤖 Starting automation...');
+  console.log('🤖 Starting Kayan HR automation...');
   
   const browser = await puppeteer.launch({
     headless: true,
@@ -16,28 +16,43 @@ async function runAutomation() {
   try {
     const page = await browser.newPage();
     
-    console.log('📱 Opening website...');
+    console.log('📱 Opening Kayan HR login page...');
     await page.goto(process.env.TARGET_URL, { 
       waitUntil: 'networkidle2',
       timeout: 30000 
     });
 
-    console.log('🔑 Entering username...');
-    // You'll need to replace 'input[name="username"]' with the actual selector from your website
-    await page.type('input[name="username"]', process.env.USERNAME);
+    // Wait for the page to fully load
+    await page.waitForTimeout(3000);
+
+    console.log('🔑 Entering username/email...');
+    await page.type('input[name="Username"]', process.env.USERNAME);
+    
+    await page.waitForTimeout(1000); // Small delay between fields
     
     console.log('🔒 Entering password...');
-    // You'll need to replace 'input[name="password"]' with the actual selector from your website
-    await page.type('input[name="password"]', process.env.PASSWORD);
+    await page.type('input[name="Password"]', process.env.PASSWORD);
     
-    console.log('👆 Clicking login button...');
-    // You'll need to replace 'button[type="submit"]' with the actual selector from your website
-    await page.click('button[type="submit"]');
+    await page.waitForTimeout(1000); // Small delay before clicking
     
-    // Wait 5 seconds for the page to load after clicking
-    await page.waitForTimeout(5000);
+    console.log('👆 Clicking Log In button...');
+    await page.click('#btnSignin');
     
-    console.log('✅ Task completed successfully!');
+    // Wait for login to complete and page to redirect
+    console.log('⏳ Waiting for login to complete...');
+    await page.waitForTimeout(8000);
+    
+    // Check if login was successful by looking at the URL or page content
+    const currentUrl = page.url();
+    console.log('📍 Current URL after login:', currentUrl);
+    
+    if (currentUrl !== process.env.TARGET_URL) {
+      console.log('✅ Login successful! Redirected to dashboard.');
+    } else {
+      console.log('⚠️  Still on login page - please check credentials.');
+    }
+    
+    console.log('✅ Kayan HR automation completed!');
     
   } catch (error) {
     console.log('❌ Something went wrong:', error.message);
